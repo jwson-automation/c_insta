@@ -10,6 +10,20 @@ class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<model.User> getUserDetatils() async {
+    //아래의 user는 Firebase의 유저임
+    User currentUser = _auth.currentUser!;
+
+    DocumentSnapshot snap =
+        await _firestore.collection('users').doc(currentUser.uid).get();
+
+    // 위에서 스냅 찍어둔걸 Map 형식으로 바꿔주는 static을 땡겨와서 적어준다.
+    return model.User.fromSnap(snap);
+    // 원래라면 아래처럼 어렵게
+    // model.User(
+    //     followers: (snap.data() as Map<String, dynamic>)['followers']);
+  }
+
   // sign up user
   Future<String> signUpUser({
     required String email,
