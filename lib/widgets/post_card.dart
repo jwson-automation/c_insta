@@ -1,13 +1,25 @@
+import 'package:c_insta/resouces/firestore_methods.dart';
 import 'package:c_insta/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:c_insta/models/user.dart' as model;
+import 'package:provider/provider.dart';
 
-class PostCard extends StatelessWidget {
+import '../providers/user_provider.dart';
+
+class PostCard extends StatefulWidget {
   final snap;
   const PostCard({Key? key, required this.snap}) : super(key: key);
 
   @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  @override
   Widget build(BuildContext context) {
+    final model.User? user = Provider.of<UserProvider>(context).getUser;
+
     return Container(
       color: mobileBackgroundColor,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -21,7 +33,7 @@ class PostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundImage: NetworkImage(snap['profImage']),
+                  backgroundImage: NetworkImage(widget.snap['profImage']),
                 ),
                 Expanded(
                     child: Padding(
@@ -31,7 +43,7 @@ class PostCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        snap['username'],
+                        widget.snap['username'],
                         style: TextStyle(fontWeight: FontWeight.bold),
                       )
                     ],
@@ -72,7 +84,7 @@ class PostCard extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.35,
             width: double.infinity,
             child: Image.network(
-              snap['postUrl'],
+              widget.snap['postUrl'],
               fit: BoxFit.cover,
             ),
           ),
@@ -81,7 +93,10 @@ class PostCard extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await FirestoreMethods().likePost(
+                      widget.snap['postId'], user!.uid, widget.snap['likes']);
+                },
                 icon: const Icon(
                   Icons.favorite,
                   color: Colors.red,
@@ -126,7 +141,7 @@ class PostCard extends StatelessWidget {
                       .subtitle2!
                       .copyWith(fontWeight: FontWeight.w800),
                   child: Text(
-                    "${snap['likes'].length} likes",
+                    "${widget.snap['likes'].length} likes",
                     style: Theme.of(context).textTheme.bodyText2,
                   ),
                 ),
@@ -139,11 +154,11 @@ class PostCard extends StatelessWidget {
                       children: [
                         TextSpan(
                           style: const TextStyle(fontWeight: FontWeight.bold),
-                          text: '${snap["username"]} ',
+                          text: '${widget.snap["username"]} ',
                         ),
                         TextSpan(
                           style: const TextStyle(),
-                          text: snap['description'],
+                          text: widget.snap['description'],
                         ),
                       ],
                     ),
@@ -162,7 +177,8 @@ class PostCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 4),
                   child: Text(
-                    DateFormat.yMMMd().format(snap['datePublished'].toDate()),
+                    DateFormat.yMMMd()
+                        .format(widget.snap['datePublished'].toDate()),
                     style: TextStyle(fontSize: 16, color: secondaryColor),
                   ),
                 ),
